@@ -111,11 +111,11 @@ def play_game(rounds):
             print start_msg.format(p=pKey, s=pVal.score)
             enter_dart_msg = "  Dart {d} score: "
             rnd = Round()
-            dart = int(raw_input(enter_dart_msg.format(d=1)))
+            dart = raw_input(enter_dart_msg.format(d=1))
             rnd.first_dart(DartThrow(dart))
-            dart = int(raw_input(enter_dart_msg.format(d=2)))
+            dart = raw_input(enter_dart_msg.format(d=2))
             rnd.second_dart(DartThrow(dart))
-            dart = int(raw_input(enter_dart_msg.format(d=3)))
+            dart = raw_input(enter_dart_msg.format(d=3))
             rnd.third_dart(DartThrow(dart))
 
             pVal.score += rnd.total

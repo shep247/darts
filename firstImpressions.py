@@ -9,74 +9,92 @@ class Player:
         return self.darts_thrown/self.marks
 
 
+class DartThrow:
+    def __init__(self, dart):
+        self.missed = False
+        if dart.upper() == 'M':
+            self.missed = True
+            self.multiplier = 'S'
+            self.bed = 0
+        else:
+            self.multiplier = dart[:1].upper()
+            self.bed = int(dart[1:])
+
+    @property
+    def score(self):
+        return {'S': 1, 'D': 2, 'T': 3}[self.multiplier] * self.bed
+
+
 class Round:
     marker = -1
     missed_first = False
     missed_second = False
     total = 0
 
-    def first_dart(self, points):
-        if points == 0:
+    def _get_score(self, multiplier, bed):
+        return {'S':1, 'D':2, 'T':3}[multiplier.upper()] * bed
+
+    def first_dart(self, throw):
+        if throw.missed:
             self.missed_first = True
             return
-        self.marker = points
-        self.total += points
+        self.marker = throw.bed
+        self.total += throw.score
 
-    def second_dart(self, points):
-        if not points:
+    def second_dart(self, throw):
+        if throw.missed:
             # missed.  score will be determined by 3rd dart
             self.missed_second = True
             return
 
-        if self.missed_first or points != self.marker:
+        if self.missed_first or throw.bed != self.marker:
             # missed first dart or missed marker-> negative second score
-            self.total -= points
+            self.total -= throw.score
         else:
             # hit marker:  positive score
-            self.total += points
+            self.total += throw.score
 
-    def third_dart(self, points):
+    def third_dart(self, throw):
         if self.missed_first and self.missed_second:
             # missed board on 1st and 2nd dart
-            if points:
+            if not throw.missed:
                 # hit a number on 3rd
                 # 3 * what you hit subtracted from total
-                self.total -= 3 * points
+                self.total -= 3 * throw.score
             else:
                 # missed all 3.  negative 200
                 self.total -= 200
         elif self.missed_second:
             # missed board on 2nd dart, but not 1st
-            if points == self.marker:
+            if throw.bed == self.marker:
                 # hit marker on 3rd.  No points
                 return
-            elif not points:
+            elif throw.missed:
                 # missed both 2nd and 3rd darts, -150
                 self.total -= 150
             else:
                 # hit wrong spot on 3rd, but hit board
                 # -2 * what you hit on 3rd
-                self.total -= 2 * points
+                self.total -= 2 * throw.score
         elif self.missed_first:
             # hit 2nd dart, but missed 1st
-            if points:
-                # hit board: subtract what you hit
-                self.total -= points
-            else:
+            if throw.missed:
                 # missed board: subtract 50
                 self.total -= 50
+            else:
+                # hit board: subtract what you hit
+                self.total -= throw.score
         else:
             # hit 1st and 2nd
-            if not points:
+            if throw.missed:
                 # miss board: -50
                 self.total -= 50
-            elif points == self.marker:
+            elif throw.bed == self.marker:
                 # hit marker:  add points
-                self.total += points
+                self.total += throw.score
             else:
                 # missed marker:  subtract points
-                self.total -= points
-
+                self.total -= throw.score
 
 
 def print_score(round):
@@ -94,11 +112,11 @@ def play_game(rounds):
             enter_dart_msg = "  Dart {d} score: "
             rnd = Round()
             dart = int(raw_input(enter_dart_msg.format(d=1)))
-            rnd.first_dart(dart)
+            rnd.first_dart(DartThrow(dart))
             dart = int(raw_input(enter_dart_msg.format(d=2)))
-            rnd.second_dart(dart)
+            rnd.second_dart(DartThrow(dart))
             dart = int(raw_input(enter_dart_msg.format(d=3)))
-            rnd.third_dart(dart)
+            rnd.third_dart(DartThrow(dart))
 
             pVal.score += rnd.total
 

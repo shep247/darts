@@ -1,3 +1,4 @@
+import re
 
 class Player:
     score = 0
@@ -103,19 +104,39 @@ def print_score(round):
     for player, score in score:
         print "  Player {p}: {s}".format(p=player, s=score)
 
+def get_throw(dart_num):
+    enter_dart_msg = "  Dart {d} score: "
+    dart = ""
+    while True:
+        dart = raw_input(enter_dart_msg.format(d=dart_num))
+        if not dart:
+            print "  Incorrect Input.  Try Again."
+            continue
+        elif dart.upper() == 'M':
+            return dart
+        elif re.search('^\d{1,2}$', dart) is not None:
+            # only a number.  assume single
+            if (0 < int(dart) < 21) or int(dart) == 25:
+                return 'S'+dart
+        elif re.search('^[STDstd]\d{1,2}$', dart ) is not None:
+            # letter followed by a number
+            if (0 < int(dart[1:]) < 21) or int(dart[1:]) == 25:
+                return dart
+        print "  Incorrect Input.  Try Again."
+
+
 def play_game(rounds):
     for _ in xrange(1,rounds+1):
         print_score(_)
         for pKey, pVal in players.iteritems():
             start_msg = "Player {p}'s turn. Starting score = {s}"
             print start_msg.format(p=pKey, s=pVal.score)
-            enter_dart_msg = "  Dart {d} score: "
             rnd = Round()
-            dart = raw_input(enter_dart_msg.format(d=1))
+            dart = get_throw(1)
             rnd.first_dart(DartThrow(dart))
-            dart = raw_input(enter_dart_msg.format(d=2))
+            dart = get_throw(2)
             rnd.second_dart(DartThrow(dart))
-            dart = raw_input(enter_dart_msg.format(d=3))
+            dart = get_throw(3)
             rnd.third_dart(DartThrow(dart))
 
             pVal.score += rnd.total

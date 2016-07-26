@@ -29,36 +29,50 @@ class DartThrow:
         return {'S': 1, 'D': 2, 'T': 3}[self.multiplier] * self.bed
 
 
-def print_score(round):
+def print_score(round, players):
     score = [(x, y.score) for x, y in players.iteritems()]
     print "Round ", round
     for player, score in score:
         print "  Player {p}: {s}".format(p=player, s=score)
 
+def parse_dart_input(dart):
+    if not dart:
+        return False
+    elif dart.upper() == 'M':
+        return dart.upper()
+    elif re.search('^\d{1,2}$', dart) is not None:
+        # only a number.  assume single
+        if (0 < int(dart) < 21) or int(dart) == 25:
+            return 'S' + dart
+    elif re.search('^[STDstd]\d{1,2}$', dart) is not None:
+        # letter followed by a number
+        if (0 < int(dart[1:]) < 21) or int(dart[1:]) == 25:
+            return dart.upper()
+    return False
+
+
 def get_throw(dart_num):
     enter_dart_msg = "  Dart {d} score: "
     dart = ""
-    while True:
-        dart = raw_input(enter_dart_msg.format(d=dart_num))
+    while not dart:
+        d = raw_input(enter_dart_msg.format(d=dart_num))
+        dart = parse_dart_input(d)
         if not dart:
-            print "  Incorrect Input.  Try Again."
-            continue
-        elif dart.upper() == 'M':
-            return dart
-        elif re.search('^\d{1,2}$', dart) is not None:
-            # only a number.  assume single
-            if (0 < int(dart) < 21) or int(dart) == 25:
-                return 'S'+dart
-        elif re.search('^[STDstd]\d{1,2}$', dart ) is not None:
-            # letter followed by a number
-            if (0 < int(dart[1:]) < 21) or int(dart[1:]) == 25:
-                return dart
-        print "  Incorrect Input.  Try Again."
+            print "  Invalid Input.  Try Again"
+    return dart
 
 
-def play_game(rounds):
+def create_players(numOfPlayers):
+    players = {}
+    for _ in xrange(numOfPlayers):
+        players[_] = Player()
+    return players
+
+
+def play_game(numOfPlayers, rounds):
+    players = create_players(numOfPlayers)
     for _ in xrange(1,rounds+1):
-        print_score(_)
+        print_score(_, players)
         for pKey, pVal in players.iteritems():
             start_msg = "Player {p}'s turn. Starting score = {s}"
             print start_msg.format(p=pKey, s=pVal.score)
@@ -68,9 +82,10 @@ def play_game(rounds):
             dart = get_throw(2)
             rnd.dart2_and_3(DartThrow(dart))
             dart = get_throw(3)
-            rnd.dart3(DartThrow(dart))
+            rnd.dart2_and_3(DartThrow(dart))
 
             pVal.score += rnd.total
+    return players
 
 
 if __name__ == "__main__":
@@ -79,10 +94,7 @@ if __name__ == "__main__":
 
     outputStr = "We're going to play {rds} rounds with {numpl} players"
     print outputStr.format(numpl=numOfPlayers, rds=rounds)
-    players = {}
-    for _ in xrange(numOfPlayers):
-        players[_] = Player()
-    play_game(rounds)
+    players = play_game(numOfPlayers, rounds)
     print "-------------"
-    print_score('FINAL')
+    print_score('FINAL', players)
     print "-------------"

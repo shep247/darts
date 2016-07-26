@@ -1,5 +1,5 @@
 import unittest
-from firstImpressions import DartThrow
+from game import DartThrow
 from round import Round
 from ddt import ddt, data, unpack
 

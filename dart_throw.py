@@ -37,8 +37,8 @@ def get_throw(dart_num):
     enter_dart_msg = "  Dart {d} score: "
     dart = ""
     while not dart:
-        d = raw_input(enter_dart_msg.format(d=dart_num))
+        d = input(enter_dart_msg.format(d=dart_num))
         dart = parse_dart_input(d)
         if not dart:
-            print "  Invalid Input.  Try Again"
+            print("  Invalid Input.  Try Again")
     return dart
